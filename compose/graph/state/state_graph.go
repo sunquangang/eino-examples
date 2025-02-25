@@ -26,7 +26,6 @@ import (
 
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
-	"github.com/cloudwego/eino/utils/safe"
 
 	"github.com/cloudwego/eino-examples/internal/logs"
 )
@@ -99,12 +98,9 @@ func main() {
 		go func() {
 
 			defer func() {
-				panicErr := recover()
-				if panicErr != nil {
-					err := safe.NewPanicErr(panicErr, debug.Stack())
-					logs.Errorf("panic occurs: %v\n", err)
+				if err := recover(); err != nil {
+					logs.Errorf("panic occurs: %v\nStack Trace:\n%s", err, string(debug.Stack()))
 				}
-
 			}()
 
 			for _, field := range strings.Fields(prefix) {
