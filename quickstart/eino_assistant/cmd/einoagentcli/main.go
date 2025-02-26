@@ -30,8 +30,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/pkg/env"
-
+	"github.com/cloudwego/eino-ext/callbacks/apmplus"
 	"github.com/cloudwego/eino-ext/callbacks/langfuse"
 	"github.com/cloudwego/eino-ext/devops"
 	"github.com/cloudwego/eino/callbacks"
@@ -39,6 +38,7 @@ import (
 	"github.com/cloudwego/eino/schema"
 
 	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/eino/einoagent"
+	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/pkg/env"
 	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/pkg/mem"
 )
 
@@ -132,6 +132,25 @@ func Init() error {
 	cbHandler = LogCallback(cbConfig)
 
 	// init global callback, for trace and metrics
+	callbackHandlers := make([]callbacks.Handler, 0)
+	if os.Getenv("APMPLUS_APP_KEY") != "" {
+		region := os.Getenv("APMPLUS_REGION")
+		if region == "" {
+			region = "cn-beijing"
+		}
+		fmt.Println("[eino agent] INFO: use apmplus as callback, watch at: https://console.volcengine.com/apmplus-server")
+		cbh, _, err := apmplus.NewApmplusHandler(&apmplus.Config{
+			Host:        fmt.Sprintf("apmplus-%s.volces.com:4317", region),
+			AppKey:      os.Getenv("APMPLUS_APP_KEY"),
+			ServiceName: "eino-assistant",
+			Release:     "release/v0.0.1",
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+		callbackHandlers = append(callbackHandlers, cbh)
+	}
+
 	if os.Getenv("LANGFUSE_PUBLIC_KEY") != "" && os.Getenv("LANGFUSE_SECRET_KEY") != "" {
 		fmt.Println("[eino agent] INFO: use langfuse as callback, watch at: https://cloud.langfuse.com")
 		cbh, _ := langfuse.NewLangfuseHandler(&langfuse.Config{
@@ -144,7 +163,10 @@ func Init() error {
 			UserID:    "eino_god",
 			Tags:      []string{"eino", "assistant"},
 		})
-		callbacks.InitCallbackHandlers([]callbacks.Handler{cbh})
+		callbackHandlers = append(callbackHandlers, cbh)
+	}
+	if len(callbackHandlers) > 0 {
+		callbacks.InitCallbackHandlers(callbackHandlers)
 	}
 
 	return nil
