@@ -23,22 +23,23 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/eino/knowledgeindexing"
 	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/pkg/env"
-
+	pkgredis "github.com/cloudwego/eino-examples/quickstart/eino_assistant/pkg/redis"
 	"github.com/cloudwego/eino/components/document"
 	"github.com/cloudwego/eino/components/embedding"
 	"github.com/redis/go-redis/v9"
-
-	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/eino/knowledgeindexing"
 )
 
 func init() {
 	// check some essential envs
-	env.MustHasEnvs("ARK_API_KEY", "ARK_EMBEDDING_MODEL")
+	env.MustHasEnvs("OPENAI_API_KEY", "OPENAI_EMBEDDING_MODEL_NAME", "OPENAI_BASE_URL")
 }
 
 func main() {
 	ctx := context.Background()
+
+	pkgredis.Init()
 
 	err := indexMarkdownFiles(ctx, "./eino-docs")
 	if err != nil {
@@ -63,8 +64,11 @@ func indexMarkdownFiles(ctx context.Context, dir string) error {
 			return nil
 		}
 
-		if !strings.HasSuffix(path, ".md") {
-			fmt.Printf("[skip] not a markdown file: %s\n", path)
+		// if !strings.HasSuffix(path, ".md") {
+		// 	fmt.Printf("[skip] not a markdown file: %s\n", path)
+		// 	return nil
+		// }
+		if !strings.Contains(path, "id_9319") {
 			return nil
 		}
 
@@ -136,6 +140,8 @@ func initVectorIndex(ctx context.Context, config *RedisVectorStoreConfig) (err e
 		"SCHEMA",
 		"content", "TEXT",
 		"metadata", "TEXT",
+		"auto_brand_id", "TEXT",
+		"auto_type_id", "TEXT",
 		"vector", "VECTOR", "FLAT",
 		"6",
 		"TYPE", "FLOAT32",

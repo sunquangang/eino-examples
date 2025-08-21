@@ -112,7 +112,7 @@ func main() {
 
 func Init() error {
 	// check some essential envs
-	env.MustHasEnvs("ARK_CHAT_MODEL", "ARK_EMBEDDING_MODEL", "ARK_API_KEY")
+	env.MustHasEnvs("OPENAI_API_KEY", "OPENAI_MODEL_NAME", "OPENAI_BASE_URL")
 
 	os.MkdirAll("log", 0755)
 	var f *os.File
@@ -154,7 +154,7 @@ func Init() error {
 	if os.Getenv("LANGFUSE_PUBLIC_KEY") != "" && os.Getenv("LANGFUSE_SECRET_KEY") != "" {
 		fmt.Println("[eino agent] INFO: use langfuse as callback, watch at: https://cloud.langfuse.com")
 		cbh, _ := langfuse.NewLangfuseHandler(&langfuse.Config{
-			Host:      "https://cloud.langfuse.com",
+			Host:      "https://us.cloud.langfuse.com",
 			PublicKey: os.Getenv("LANGFUSE_PUBLIC_KEY"),
 			SecretKey: os.Getenv("LANGFUSE_SECRET_KEY"),
 			Name:      "Eino Assistant",

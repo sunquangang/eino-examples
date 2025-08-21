@@ -65,7 +65,7 @@ func main() {
 	// replace tool call checker with a custom one: check all trunks until you get a tool call
 	// because some models(claude or doubao 1.5-pro 32k) do not return tool call in the first response
 	// uncomment the following code to enable it
-	/*toolCallChecker := func(ctx context.Context, sr *schema.StreamReader[*schema.Message]) (bool, error) {
+	toolCallChecker := func(ctx context.Context, sr *schema.StreamReader[*schema.Message]) (bool, error) {
 		defer sr.Close()
 		for {
 			msg, err := sr.Recv()
@@ -83,14 +83,14 @@ func main() {
 			}
 		}
 		return false, nil
-	}*/
+	}
 
 	ragent, err := react.NewAgent(ctx, &react.AgentConfig{
 		ToolCallingModel: arkModel,
 		ToolsConfig: compose.ToolsNodeConfig{
 			Tools: []tool.BaseTool{restaurantTool, dishTool},
 		},
-		// StreamToolCallChecker: toolCallChecker, // uncomment it to replace the default tool call checker with custom one
+		StreamToolCallChecker: toolCallChecker, // uncomment it to replace the default tool call checker with custom one
 	})
 	if err != nil {
 		logs.Errorf("failed to create agent: %v", err)
@@ -98,31 +98,32 @@ func main() {
 	}
 
 	// if you want ping/pong, use Generate
-	// msg, err := agent.Generate(ctx, []*schema.Message{
+	// msg, err := ragent.Generate(ctx, []*schema.Message{
 	// 	{
 	// 		Role:    schema.User,
 	// 		Content: "我在北京，给我推荐一些菜，需要有口味辣一点的菜，至少推荐有 2 家餐厅",
 	// 	},
-	// }, react.WithCallbacks(&myCallback{}))
+	// }, agent.WithComposeOptions(compose.WithCallbacks(&LoggerCallback{})))
 	// if err != nil {
-	// 	log.Printf("failed to generate: %v\n", err)
+	// 	logs.Errorf("failed to generate: %v\n", err)
 	// 	return
 	// }
 	// fmt.Println(msg.String())
+	// logs.Fatalf("")
 
 	// If you want to use cached ark chat model, define a cache option and pass it to the agent.
 	// cacheOption := &ark.CacheOption{
-	//		APIType: ark.ResponsesAPI,
-	//		SessionCache: &ark.SessionCacheConfig{
-	//			EnableCache: true,
-	//			TTL:         3600,
-	//		},
-	//	}
+	// 		APIType: ark.ResponsesAPI,
+	// 		SessionCache: &ark.SessionCacheConfig{
+	// 			EnableCache: true,
+	// 			TTL:         3600,
+	// 		},
+	// 	}
 	// ctx = WithCacheCtx(ctx, cacheOption)
 
 	opt := []agent.AgentOption{
 		agent.WithComposeOptions(compose.WithCallbacks(&LoggerCallback{})),
-		//react.WithChatModelOptions(ark.WithCache(cacheOption)),
+		// react.WithChatModelOptions(ark.WithCache(cacheOption)),
 	}
 
 	sr, err := ragent.Stream(ctx, []*schema.Message{

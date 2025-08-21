@@ -48,9 +48,11 @@ var systemPrompt = `
 
 - If the question is compound or complex, you need to think step by step, avoiding giving low-quality answers directly.
 
+- 如果回答的内容是基于 doc 的内容，请请在回答的最后列出 meta_data 中的 source 字段的值作为引用来源。
+
 ## Context Information
 - Current Date: {date}
-- Related Documents: |-
+- Related Documents (each document includes ID, content, and metadata): |-
 ==== doc start ====
   {documents}
 ==== doc end ====

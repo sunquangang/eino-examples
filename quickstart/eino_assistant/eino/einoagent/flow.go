@@ -19,6 +19,7 @@ package einoagent
 import (
 	"context"
 
+	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/pkg/utils"
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/flow/agent/react"
 )
@@ -28,12 +29,14 @@ func newLambda1(ctx context.Context) (lba *compose.Lambda, err error) {
 	// TODO Modify component configuration here.
 	config := &react.AgentConfig{
 		MaxStep:            25,
-		ToolReturnDirectly: map[string]struct{}{}}
+		ToolReturnDirectly: map[string]struct{}{},
+		StreamToolCallChecker: utils.ToolCallChecker,
+	}
 	chatModelIns11, err := newChatModel(ctx)
 	if err != nil {
 		return nil, err
 	}
-	config.Model = chatModelIns11
+	config.ToolCallingModel = chatModelIns11
 	tools, err := GetTools(ctx)
 	if err != nil {
 		return nil, err

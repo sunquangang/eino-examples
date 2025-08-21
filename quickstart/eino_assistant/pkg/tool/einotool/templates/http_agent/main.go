@@ -24,6 +24,7 @@ import (
 	"io"
 	"sync"
 
+	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/pkg/utils"
 	"github.com/cloudwego/eino-ext/components/model/ark"
 	"github.com/cloudwego/eino-ext/components/tool/duckduckgo/v2"
 	"github.com/cloudwego/eino/components/model"
@@ -152,6 +153,7 @@ func NewAgent(ctx context.Context) (*react.Agent, error) {
 		ToolsConfig: compose.ToolsNodeConfig{
 			Tools: tools,
 		},
+		StreamToolCallChecker: utils.ToolCallChecker,
 	})
 	if err != nil {
 		return nil, err

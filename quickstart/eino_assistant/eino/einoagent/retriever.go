@@ -19,6 +19,7 @@ package einoagent
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -46,16 +47,23 @@ func newRetriever(ctx context.Context) (rtr retriever.Retriever, err error) {
 		TopK:         8,
 		VectorField:  redispkg.VectorField,
 		DocumentConverter: func(ctx context.Context, doc redisCli.Document) (*schema.Document, error) {
+			log.Printf("doc: %+v", doc)
 			resp := &schema.Document{
 				ID:       doc.ID,
 				Content:  "",
 				MetaData: map[string]any{},
 			}
+
+			// Store raw metadata for later use
+			var metadataStr string
+
 			for field, val := range doc.Fields {
 				if field == redispkg.ContentField {
 					resp.Content = val
 				} else if field == redispkg.MetadataField {
+					log.Printf("metadata: %s", val)
 					resp.MetaData[field] = val
+					metadataStr = val
 				} else if field == redispkg.DistanceField {
 					distance, err := strconv.ParseFloat(val, 64)
 					if err != nil {
@@ -64,6 +72,13 @@ func newRetriever(ctx context.Context) (rtr retriever.Retriever, err error) {
 					resp.WithScore(1 - distance)
 				}
 			}
+
+			// Format the content to include ID and metadata
+			formattedContent := fmt.Sprintf("[Document ID: %s]\nContent: %s", doc.ID, resp.Content)
+			if metadataStr != "" {
+				formattedContent = fmt.Sprintf("%s\nMetadata: %s", formattedContent, metadataStr)
+			}
+			resp.Content = formattedContent
 
 			return resp, nil
 		},

@@ -18,6 +18,7 @@ package einoagent
 
 import (
 	"context"
+	"time"
 
 	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/pkg/tool/einotool"
 	"github.com/cloudwego/eino-examples/quickstart/eino_assistant/pkg/tool/gitclone"
@@ -52,18 +53,22 @@ func GetTools(ctx context.Context) ([]tool.BaseTool, error) {
 	if err != nil {
 		return nil, err
 	}
+	_ = toolDDGSearch
 
 	return []tool.BaseTool{
 		einoAssistantTool,
 		toolTask,
 		toolOpen,
 		toolGitClone,
-		toolDDGSearch,
+		// toolDDGSearch,
 	}, nil
 }
 
 func defaultDDGSearchConfig(ctx context.Context) (*duckduckgo.Config, error) {
-	config := &duckduckgo.Config{}
+	config := &duckduckgo.Config{
+		MaxResults: 3,
+		Timeout:    30 * time.Second,
+	}
 	return config, nil
 }
 

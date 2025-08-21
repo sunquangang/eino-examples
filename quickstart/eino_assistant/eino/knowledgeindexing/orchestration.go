@@ -35,7 +35,7 @@ func BuildKnowledgeIndexing(ctx context.Context) (r compose.Runnable[document.So
 		return nil, err
 	}
 	_ = g.AddLoaderNode(FileLoader, fileLoaderKeyOfLoader)
-	markdownSplitterKeyOfDocumentTransformer, err := newDocumentTransformer(ctx)
+	markdownSplitterKeyOfDocumentTransformer, err := newDocumentTransformerV2(ctx)
 	if err != nil {
 		return nil, err
 	}

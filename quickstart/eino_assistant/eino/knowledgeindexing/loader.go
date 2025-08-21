@@ -26,7 +26,15 @@ import (
 // newLoader component initialization function of node 'FileLoader' in graph 'KnowledgeIndexing'
 func newLoader(ctx context.Context) (ldr document.Loader, err error) {
 	// TODO Modify component configuration here.
-	config := &file.FileLoaderConfig{}
+
+	parser, err := newParser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	config := &file.FileLoaderConfig{
+		UseNameAsID: false,
+		Parser:      parser,
+	}
 	ldr, err = file.NewFileLoader(ctx, config)
 	if err != nil {
 		return nil, err

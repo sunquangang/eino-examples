@@ -19,6 +19,7 @@ package einoagent
 import (
 	"context"
 
+	"github.com/cloudwego/eino-ext/components/retriever/redis"
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
 )

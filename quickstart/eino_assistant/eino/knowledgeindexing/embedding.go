@@ -20,18 +20,26 @@ import (
 	"context"
 	"os"
 
-	"github.com/cloudwego/eino-ext/components/embedding/ark"
+	"github.com/cloudwego/eino-ext/components/embedding/openai"
 	"github.com/cloudwego/eino/components/embedding"
 )
 
 func newEmbedding(ctx context.Context) (eb embedding.Embedder, err error) {
 	// TODO Modify component configuration here.
-	config := &ark.EmbeddingConfig{
-		BaseURL: "https://ark.cn-beijing.volces.com/api/v3",
-		APIKey:  os.Getenv("ARK_API_KEY"),
-		Model:   os.Getenv("ARK_EMBEDDING_MODEL"),
+	// config := &ark.EmbeddingConfig{
+	// 	BaseURL: "https://ark.cn-beijing.volces.com/api/v3",
+	// 	APIKey:  os.Getenv("ARK_API_KEY"),
+	// 	Model:   os.Getenv("ARK_EMBEDDING_MODEL"),
+	// }
+	// eb, err = ark.NewEmbedder(ctx, config)
+	dimensions := 1024
+	config := &openai.EmbeddingConfig{
+		Model:      os.Getenv("OPENAI_EMBEDDING_MODEL_NAME"),
+		APIKey:     os.Getenv("OPENAI_API_KEY"),
+		BaseURL:    os.Getenv("OPENAI_BASE_URL"),
+		Dimensions: &dimensions,
 	}
-	eb, err = ark.NewEmbedder(ctx, config)
+	eb, err = openai.NewEmbedder(ctx, config)
 	if err != nil {
 		return nil, err
 	}

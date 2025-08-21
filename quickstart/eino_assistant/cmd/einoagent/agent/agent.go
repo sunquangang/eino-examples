@@ -28,6 +28,7 @@ import (
 
 	"github.com/cloudwego/eino-ext/callbacks/apmplus"
 	"github.com/cloudwego/eino-ext/callbacks/langfuse"
+	"github.com/cloudwego/eino-ext/components/retriever/redis"
 	"github.com/cloudwego/eino/callbacks"
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
@@ -86,7 +87,7 @@ func Init() error {
 		if os.Getenv("LANGFUSE_PUBLIC_KEY") != "" && os.Getenv("LANGFUSE_SECRET_KEY") != "" {
 			fmt.Println("[eino agent] INFO: use langfuse as callback, watch at: https://cloud.langfuse.com")
 			cbh, _ := langfuse.NewLangfuseHandler(&langfuse.Config{
-				Host:      "https://cloud.langfuse.com",
+				Host:      "https://us.cloud.langfuse.com",
 				PublicKey: os.Getenv("LANGFUSE_PUBLIC_KEY"),
 				SecretKey: os.Getenv("LANGFUSE_SECRET_KEY"),
 				Name:      "Eino Assistant",
@@ -122,7 +123,7 @@ func RunAgent(ctx context.Context, id string, msg string) (*schema.StreamReader[
 		// set session info for apmplus callback
 		ctx = apmplus.SetSession(ctx, apmplus.WithSessionID(id), apmplus.WithUserID("eino-assistant-user"))
 	}
-	sr, err := runner.Stream(ctx, userMessage, compose.WithCallbacks(cbHandler))
+	sr, err := runner.Stream(ctx, userMessage, compose.WithCallbacks(cbHandler), compose.WithRetrieverOption(redis.WithFilterQuery("")))
 	if err != nil {
 		return nil, fmt.Errorf("failed to stream: %w", err)
 	}
